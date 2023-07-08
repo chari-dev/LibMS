@@ -23,12 +23,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (empty($memberNumber)) {
         $errors[] = "Member number is required.";
     } elseif (!preg_match('/^\d+$/', $memberNumber)) {
-        $errors[] = "Member number should contain only digits.";
+        $errors[] = "Member number should contain only 6 digits.";
     }
 
     // Name validation (you can customize this validation as needed)
     if (empty($name)) {
-        $errors[] = "Name is required.";
+        $errors[] = "Username is required.";
     }
     
     // Member phone validation (you can customize this validation as needed)
@@ -55,31 +55,47 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (count($errors) === 0) {
         // Registration successful (you can process the data and store it in a database)
         // In this example, we are storing the data in a session variable
-        $sql = "INSERT INTO `member` (`id`, `name`, `phone`, `email`, `password`) VALUES ('$memberNumber', '$name', '$phone', '$email', '$password')";
-        $sql_nodouble = "SELECT 'id' FROM `member` WHERE `id` = '$memberNumber'";
-        
-
-        // $stmt = mysqli_stmt_init($conn);
-        // if (!mysqli_stmt_prepare($stmt, $sql)) {
-        //     $errors[] = "Password is required.";
-        // }
-        
-        $nodouble = mysqli_query($conn, $sql_nodouble);
-        if (mysqli_num_rows($nodouble) === 0) {
-            $query = mysqli_query($conn, $sql);
-            if ($query) {
-                $_SESSION['member_number'] = $memberNumber;
-                header('Location: dashboard.php');
-                exit();
-            } else {
-                $errors[] = "SERVER ERROR!";
-            }
+        $sql_nodouble = "SELECT 'id' FROM `member` WHERE `id` = ? OR 'name' = ?"; //`id` = '$memberNumber'";
+        $stmt = mysqli_stmt_init($conn);
+        if (!mysqli_stmt_prepare($stmt, $sql_nodouble)) {
+            $errors[] = "Error Reaching Server; Refresh the page!";
+            exit();
         } else {
-            $errors[] = "Member Number already exists.";
+            mysqli_stmt_bind_param($stmt, "is", $memberNumber, $name);
+            mysqli_stmt_execute($stmt);
+            mysqli_stmt_store_result($stmt);
+            $resultCheck = mysqli_stmt_num_rows($stmt);
+            if ($resultCheck === 1) {
+                $errors[] = "Member Number already exists.";
+                exit();
+            } 
+            else {
+                $sql = "INSERT INTO `member` (`id`, `name`, `phone`, `email`, `password`) VALUES (?, ?, ?, ?, ?)"; //('$memberNumber', '$name', '$phone', '$email', '$password')
+                $stmt = mysqli_stmt_init($conn);
+                if (!mysqli_stmt_prepare($stmt, $sql)) {
+                    $errors[] = "Error Reaching Server; Refresh the page!";
+                    exit();
+                } else {
+                    $hashedpwd = password_hash($password, PASSWORD_DEFAULT);
+
+                    mysqli_stmt_bind_param($stmt, "isiss", $memberNumber, $name, $phone, $email, $hashedpwd);
+                    mysqli_stmt_execute($stmt);
+                    $_SESSION['member_number'] = $memberNumber;
+                    $_SESSION['name'] = $name;
+                    header('Location: dashboard.php');
+                    exit();
+                }
+            }
         }
+        mysqli_stmt_close($stmt);
+        mysqli_close($conn);
         
     }
 }
+// else {
+//     header('Location: ../index.php');
+//     exit();
+// }
 ?>
 
 <!DOCTYPE html>
@@ -173,7 +189,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <label for="member_number">Member Number:</label>
             <input type="text" id="member_number" name="member_number" required>
 
-            <label for="name">Name:</label>
+            <label for="name">Username:</label>
             <input type="text" id="name" name="name" required>
 
             <label for="phone">Phone:</label>

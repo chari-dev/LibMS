@@ -15,9 +15,7 @@ function validateLogin($conn)
 
         // Member number validation (you can customize this validation as needed)
         if (empty($memberNumber)) {
-            $errors[] = "Member number is required.";
-        } elseif (!preg_match('/^\d+$/', $memberNumber)) {
-            $errors[] = "Member number should contain only digits.";
+            $errors[] = "Member number or Username is required.";
         }
 
         // Password validation (you can customize this validation as needed)
@@ -27,24 +25,48 @@ function validateLogin($conn)
             $errors[] = "Password should be at least 6 characters long.";
         }
 
+
+        //improve on this bcz of sql injection by using "https://youtu.be/LC9GaXkdxF8?list=PL0eyrZgxdwhwBToawjm9faF1ixePexft-&t=4219"
         if (count($errors) === 0) {
             // Login successful (you can query the database to validate the login credentials)
-            $sql = "SELECT 'id','password' FROM `member` WHERE `id` = '$memberNumber' AND `password` = '$password'";
-            $query = mysqli_query($conn, $sql);
-
-            if ($query && mysqli_num_rows($query) === 1) {
-                // Valid login credentials
-                $_SESSION['member_number'] = $memberNumber;
-                header('Location: member/dashboard.php'); // Redirect to the member dashboard
+            $sql = "SELECT id, password FROM member WHERE id = ? OR name = ?";
+            $stmt = mysqli_stmt_init($conn);
+            if (!mysqli_stmt_prepare($stmt, $sql)) {
+                $errors[] = "Error Reaching Server; Refresh the page!";
                 exit();
             } else {
-                $errors[] = "Invalid login credentials.";
-            }
+                mysqli_stmt_bind_param($stmt, "is", $memberNumber, $memberNumber);
+                mysqli_stmt_execute($stmt);
+                $result = mysqli_stmt_get_result($stmt);
+                if ($row = mysqli_fetch_assoc($result)){
+                    $pwdCheck = password_verify($password, $row['password']);
+                    if ($pwdCheck == false) {
+                        $errors[] = "Invalid login credentials.";
+                        exit();
+                    } elseif ($pwdCheck == true){
+                        $_SESSION['member_number'] = $row['id'];
+                        header('Location: member/dashboard.php');
+                        exit();
+                    }
+                }
+                $resultCheck = mysqli_stmt_num_rows($stmt);
+                if ($resultCheck === 1) {
+                    $_SESSION['member_number'] = $memberNumber;
+                    $_SESSION['name'] = $memberNumber;
+                    header('Location: member/dashboard.php');
+                    exit();
+                } else {
+                    $errors[] = "Invalid login credentials.";
+                }
         }
-
+    }
         return $errors; // Return the errors array
     }
 }
+
+require 'dbh.inc.php';
+
+$errors = validateLogin($conn); // Call the function and assign the errors array
 ?>
 
 <!DOCTYPE html>
@@ -126,6 +148,8 @@ function validateLogin($conn)
     <div class="container">
         <h1>Library Login</h1>
         <?php
+        require 'dbh.inc.php';
+
         $errors = validateLogin($conn); // Call the function and assign the errors array
         if (!empty($errors)) {
             echo '<div class="error">';
@@ -136,7 +160,7 @@ function validateLogin($conn)
         }
         ?>
         <form method="POST" action="">
-            <label for="member_number">Member Number:</label>
+            <label for="member_number">Member Number or Username:</label>
             <input type="text" id="member_number" name="member_number" required>
 
             <label for="password">Password:</label>
