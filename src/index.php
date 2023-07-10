@@ -1,6 +1,7 @@
 <?php
 session_start();
 
+
 // Function to validate login
 function validateLogin($conn)
 {
@@ -45,18 +46,10 @@ function validateLogin($conn)
                         exit();
                     } elseif ($pwdCheck == true){
                         $_SESSION['member_number'] = $row['id'];
+                        $_SESSION['name'] = $row['id'];
                         header('Location: member/dashboard.php');
                         exit();
                     }
-                }
-                $resultCheck = mysqli_stmt_num_rows($stmt);
-                if ($resultCheck === 1) {
-                    $_SESSION['member_number'] = $memberNumber;
-                    $_SESSION['name'] = $memberNumber;
-                    header('Location: member/dashboard.php');
-                    exit();
-                } else {
-                    $errors[] = "Invalid login credentials.";
                 }
         }
     }

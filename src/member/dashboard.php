@@ -1,7 +1,12 @@
 <?php
 session_start();
 
+if (!isset($_SESSION['id'])) {
+    header("Location: ../unauthorized.php"); // Redirect to signup page
+    exit;
+}
 ?>
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -15,12 +20,22 @@ session_start();
         }
 
         .container {
-            max-width: 600px;
+            max-width: 900px;
             margin: 50px auto;
             background-color: #fff;
             border-radius: 5px;
             padding: 20px;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            display: flex;
+        }
+
+        .left-section {
+            flex: 1;
+        }
+
+        .right-section {
+            flex: 0.5;
+            margin-left: 20px;
         }
 
         h1 {
@@ -50,7 +65,7 @@ session_start();
         }
 
         .search-input {
-            width: 50%;
+            width: 60%;
             padding: 8px;
             margin-bottom: 15px;
             border: 1px solid #ccc;
@@ -119,39 +134,43 @@ session_start();
 </head>
 <body>
     <div class="container">
-        <div class="header">
+        <div class="left-section">
             <h1>Library Dashboard</h1>
-            <?php
+            <div class="header">
+                <?php
                 if(isset($_SESSION['name'])) {
                     $member_name = $_SESSION['name'];
                     echo "<div class='welcome'>Hello, $member_name </div>";
                 }
-            ?>
-            <a class="logout" href="logout.php">Logout</a>
-        </div>
-
-        <div class="quick-search">
-            <input type="text" class="search-input" placeholder="Quick Search">
-            <a class="button" href="quicksearch.php">Quick Search</a>
-        </div>
-
-        <div class="borrowed-books">
-            <h2>Current Borrowed Books</h2>
-            <div class="book-item">
-                <p class="title">Book Title</p>
-                <p>Author: Author Name</p>
-                <p>Due Date: 2023-07-31</p>
+                ?>
+                <a class="logout" href="../logout.php">Logout</a>
             </div>
-            <div class="book-item">
-                <p class="title">Book Title</p>
-                <p>Author: Author Name</p>
-                <p>Due Date: 2023-08-15</p>
+
+            <div class="quick-search">
+                <input type="text" class="search-input" placeholder="Quick Search">
+                <a class="button" href="quicksearch.php">Search</a>
             </div>
         </div>
 
-        <div class="borrowing-history">
-            <h2>Borrowing History</h2>
-            <a class="history-button" href="borrowinghistory.php">View History</a>
+        <div class="right-section">
+            <div class="borrowed-books">
+                <h2>Current Borrowed Books</h2>
+                <div class="book-item">
+                    <p class="title">Book Title</p>
+                    <p>Author: Author Name</p>
+                    <p>Due Date: 2023-07-31</p>
+                </div>
+                <div class="book-item">
+                    <p class="title">Book Title</p>
+                    <p>Author: Author Name</p>
+                    <p>Due Date: 2023-08-15</p>
+                </div>
+            </div>
+
+            <div class="borrowing-history">
+                <h2>Borrowing History</h2>
+                <a class="history-button" href="borrowinghistory.php">View History</a>
+            </div>
         </div>
     </div>
 </body>
