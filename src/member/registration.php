@@ -1,7 +1,10 @@
 <?php
 // Start session
 session_start();
-
+if (isset($_SESSION['member_number'])) {
+    header("Location: dashboard.php"); 
+    exit();
+}
 // ini_set('display_errors', '1');
 // ini_set('display_startup_errors', '1');
 // error_reporting(E_ALL);

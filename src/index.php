@@ -1,6 +1,9 @@
 <?php
 session_start();
-
+if (isset($_SESSION['member_number'])) {
+    header("Location: /member/dashboard.php"); // Redirect to signup page
+    exit();
+}
 
 // Function to validate login
 function validateLogin($conn)

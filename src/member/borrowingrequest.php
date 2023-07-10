@@ -6,9 +6,27 @@ if (!isset($_SESSION['member_number'])) {
     exit;
 }
 
-if (isset($_GET['bookid'])) {
+if (isset($_GET['bookid']) && isset($_GET['branchid'])) {
+    $bookid = $_GET['bookid'];
+    $branchid = $_GET['branchid'];
+    $sql = "INSERT INTO `borrowed` ('member_ID', 'book_ID', 'Branch_ID', `book_borrowed_date`, `book_returned_date`) VALUES (?, ?, ?, ?, ?, ?)"; //('$memberNumber', '$name', '$phone', '$email', '$password')
+    //$sql = "INSERT INTO `member` (`id`, `name`, `phone`, `email`, `password`) VALUES (?, ?, ?, ?, ?)"; //('$memberNumber', '$name', '$phone', '$email', '$password')
+    $stmt = mysqli_stmt_init($conn);
+    if (!mysqli_stmt_prepare($stmt, $sql)) {
+        $errors[] = "Error Reaching Server; Refresh the page!";
+        exit();
+    } else {
+        $currentDate = date('Y-m-d');
+        $newDate = date('Y-m-d', strtotime($currentDate . ' +30 days'));
+        mysqli_stmt_bind_param($stmt, "iiiiss", $memberNumber, $bookid, $branchid, $currentDate, $newDate);
+        mysqli_stmt_execute($stmt);
+        header('Location: dashboard.php');
+        exit();
+    }
 
-    $sql = "INSERT INTO `borrowed` (`book_borrowed_date`, `book_ID`, `book_returned_date`, `borrowing_ID`, 'Branch_ID') VALUES (?, ?, ?, ?, ?)"; //('$memberNumber', '$name', '$phone', '$email', '$password')
+
+
+
 
 
     $sql_nodouble = "SELECT 'id' FROM `member` WHERE `id` = ? OR 'name' = ?"; //`id` = '$memberNumber'";
