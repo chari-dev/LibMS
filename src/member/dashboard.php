@@ -225,7 +225,11 @@ if (!isset($_SESSION['member_number'])) {
                                     echo '<p>Publication date: ' . $row['publication_date'] . '</p>';
                                     echo '<p>Branch ID: ' . $row['branch_ID'] . '</p>';
                                     echo '<p>Available copies: ' . $row['available_copies'] . '</p>';
-                                    echo '<a class="borrow-button" href="borrowingrequest.php?memberid='. $_SESSION['member_number'] .'&bookid='. $row['book_ID'] .'&branchid='. $row['branch_ID'] .'">Borrow</a>';
+                                    if ($row['available_copies'] > 0){
+                                        echo '<a class="borrow-button" href="borrowingrequest.php?memberid='. $_SESSION['member_number'] .'&bookid='. $row['book_ID'] .'&branchid='. $row['branch_ID'] .'">Borrow</a>';
+                                    } else {
+                                        echo '<a class="borrow-button">OUT OF STOCK</a>';
+                                    }
                                     echo '</div>';
                                 }
                             } else {

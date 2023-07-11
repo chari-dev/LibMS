@@ -1,6 +1,6 @@
 <?php
 session_start();
-if (isset($_SESSION['employee_number'])) {
+if (isset($_SESSION['employee_ID'])) {
     header("Location: dashboard.php"); // Redirect to signup page
     exit();
 }
@@ -9,16 +9,16 @@ if (isset($_SESSION['employee_number'])) {
 function validateLogin($conn)
 {
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-        require 'dbh.inc.php';
+        require '../dbh.inc.php';
 
-        $employeeNumber = $_POST['employee_number'];
+        $employee_ID = $_POST['employee_ID'];
         $password = $_POST['password'];
 
         // Validate and sanitize the form data (you can add more validation as needed)
         $errors = [];
 
         // Member number validation (you can customize this validation as needed)
-        if (empty($employeeNumber)) {
+        if (empty($employee_ID)) {
             $errors[] = "Member number or Username is required.";
         }
 
@@ -37,7 +37,7 @@ function validateLogin($conn)
                 $errors[] = "Error Reaching Server; Refresh the page!";
                 exit();
             } else {
-                mysqli_stmt_bind_param($stmt, "i", $employeeNumber);
+                mysqli_stmt_bind_param($stmt, "i", $employee_ID);
                 mysqli_stmt_execute($stmt);
                 $result = mysqli_stmt_get_result($stmt);
                 if ($row = mysqli_fetch_assoc($result)){
@@ -46,7 +46,7 @@ function validateLogin($conn)
                         $errors[] = "Invalid login credentials.";
                         exit();
                     } else if ($pwdCheck == true){
-                        $_SESSION['employee_number'] = $row['employee_number'];
+                        $_SESSION['employee_ID'] = $row['employee_ID'];
                         header('Location: dashboard.php');
                         exit();
                     }
@@ -153,8 +153,8 @@ $errors = validateLogin($conn); // Call the function and assign the errors array
         }
         ?>
         <form method="POST" action="">
-            <label for="member_number">Employee Number: </label>
-            <input type="text" id="member_number" name="member_number" required>
+            <label for="employee_ID">Employee Number: </label>
+            <input type="text" id="employee_ID" name="employee_ID" required>
 
             <label for="password">Password:</label>
             <input type="password" id="password" name="password" required>

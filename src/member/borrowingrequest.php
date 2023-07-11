@@ -12,7 +12,7 @@ if (isset($_GET['bookid']) && isset($_GET['branchid'])) {
     $memberNumber = $_GET['memberid'];
     $bookid = $_GET['bookid'];
     $branchid = $_GET['branchid'];
-    $sql = "INSERT INTO `borrowed` (`id`, `book_ID`, `branch_ID`, `book_borrowed_date`, `book_returned_date`) VALUES (?, ?, ?, ?, ?)"; 
+    $sql = "INSERT INTO `borrowed` (`id`, `book_ID`, `branch_ID`, `book_borrowed_date`, `book_returned_date`) VALUES (?, ?, ?, ?, ?)";
     $stmt = mysqli_stmt_init($conn);
     if (!mysqli_stmt_prepare($stmt, $sql)) {
         header("Location: dashboard.php?bookfound=false");
@@ -22,42 +22,23 @@ if (isset($_GET['bookid']) && isset($_GET['branchid'])) {
         $newDate = date('Y-m-d', strtotime($currentDate . ' +7 days'));
         mysqli_stmt_bind_param($stmt, "iiiss", $memberNumber, $bookid, $branchid, $currentDate, $newDate);
         mysqli_stmt_execute($stmt);
-        header("Location: dashboard.php?bookfound=true");
-        exit();
+
+        // Update available_copies
+        $updateSql = "UPDATE `book` SET `available_copies` = `available_copies` - 1 WHERE `book_ID` = ? AND `branch_ID` = ?";
+        $updateStmt = mysqli_stmt_init($conn);
+        if (!mysqli_stmt_prepare($updateStmt, $updateSql)) {
+            header("Location: dashboard.php?bookfound=true&updateerror=true");
+            exit();
+        } else {
+            mysqli_stmt_bind_param($updateStmt, "ii", $bookid, $branchid);
+            mysqli_stmt_execute($updateStmt);
+            header("Location: dashboard.php?bookfound=true");
+            exit();
+        }
+
+        mysqli_stmt_close($updateStmt);
     }
 
-    // $sql_nodouble = "SELECT 'id' FROM `member` WHERE `id` = ? OR 'name' = ?"; //`id` = '$memberNumber'";
-    // $stmt = mysqli_stmt_init($conn);
-    // if (!mysqli_stmt_prepare($stmt, $sql_nodouble)) {
-    //     $errors[] = "Error Reaching Server; Refresh the page!";
-    //     exit();
-    // } else {
-    //     mysqli_stmt_bind_param($stmt, "is", $memberNumber, $name);
-    //     mysqli_stmt_execute($stmt);
-    //     mysqli_stmt_store_result($stmt);
-    //     $resultCheck = mysqli_stmt_num_rows($stmt);
-    //     if ($resultCheck === 1) {
-    //         $errors[] = "Member Number already exists.";
-    //         exit();
-    //     } 
-    //     else {
-    //         $sql = "INSERT INTO `member` (`id`, `name`, `phone`, `email`, `password`) VALUES (?, ?, ?, ?, ?)"; //('$memberNumber', '$name', '$phone', '$email', '$password')
-    //         $stmt = mysqli_stmt_init($conn);
-    //         if (!mysqli_stmt_prepare($stmt, $sql)) {
-    //             $errors[] = "Error Reaching Server; Refresh the page!";
-    //             exit();
-    //         } else {
-    //             $hashedpwd = password_hash($password, PASSWORD_DEFAULT);
-
-    //             mysqli_stmt_bind_param($stmt, "isiss", $memberNumber, $name, $phone, $email, $hashedpwd);
-    //             mysqli_stmt_execute($stmt);
-    //             $_SESSION['member_number'] = $memberNumber;
-    //             $_SESSION['name'] = $name;
-    //             header('Location: dashboard.php');
-    //             exit();
-    //         }
-    //     }
-    //}
     mysqli_stmt_close($stmt);
     mysqli_close($conn);
 }
