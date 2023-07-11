@@ -243,11 +243,17 @@ if (!isset($_SESSION['employee_ID'])) {
         </div>
         <div class="right-section">
             <div class="borrowed-books">
-                <h2>Current Borrowed Books</h2>
+                <h2>Add a new Book</h2>
+                <a class="history-button" href="newbook.php">ADD BOOK</a>
             </div>
             <div class="borrowing-history">
-                <h2>Borrowing History</h2>
-                <a class="history-button" href="history.php">View History</a>
+                <h2>Member Control</h2>
+                <a class="history-button" href="memberupdate.php">Change Member Info</a>
+                <a class="history-button" href="../member/registration.php">Create a new member</a>
+            </div>
+            <div class="borrowed-books">
+                <h2>borrowed books overview</h2>
+                <a class="history-button" href="overdue_check.php">Check Overdue</a>
             </div>
         </div>
     </div>

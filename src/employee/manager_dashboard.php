@@ -1,7 +1,8 @@
 <?php
 // Start session
 session_start();
-if (isset($_SESSION['employee_ID'])) {
+if ($_SESSION['employee_ID'] == 123456) {
+} elseif (isset($_SESSION['employee_ID'])){
     header("Location: dashboard.php"); 
     exit();
 }
@@ -68,7 +69,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Library Registration</title>
+    <title>Manager Dashboard</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -138,11 +139,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         a {
             color: #4caf50;
         }
+
+        select {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        .history-button {
+            display: inline-block;
+            background-color: #4caf50;
+            color: #fff;
+            padding: 10px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 10px;
+            text-decoration: none;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Library Registration</h1>
+        <h1>Create an employee account</h1>
 
         <?php if (isset($errors) && count($errors) > 0): ?>
             <div class="error">
@@ -153,22 +176,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <?php endif; ?>
 
         <form method="POST" action="">
-            <label for="employee_ID">employee_ID:</label>
+            <label for="employee_ID">Employee ID:</label>
             <input type="text" id="employee_ID" name="employee_ID" required>
 
-            <label for="employee_Name">employee_Name:</label>
+            <label for="employee_Name">Employee Name:</label>
             <input type="text" id="employee_Name" name="employee_Name" required>
 
-            <label for="employee_phone">employee_phone:</label>
+            <label for="employee_phone">Employee phone:</label>
             <input type="text" id="employee_phone" name="employee_phone" required>
         
-            <label for="employee_password">employee_password:</label>
+            <label for="employee_password">Employee Password:</label>
             <input type="password" id="employee_password" name="employee_password" required>
 
-            <label for="employee_email">employee_email:</label>
+            <label for="employee_email">Employee Email:</label>
             <input type="text" id="employee_email" name="employee_email" required>
 
-            <label for="employee_branch">employee_branch:</label>
+            <label for="employee_branch">Employee Branch:</label>
             <select name="employee_branch" id="employee_branch" required>
                 <option value="100001">Northridge LibMS</option>
                 <option value="100002">Lakeword LibMS</option>
@@ -179,7 +202,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <br>
             <input type="submit" value="Register">
         </form>
-
+        <a class="history-button" href="dashboard.php">Go To Employee Dashboard</a>
     </div>
 </body>
 </html>
