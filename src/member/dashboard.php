@@ -184,9 +184,11 @@ if (!isset($_SESSION['member_number'])) {
 
             <div class="borrowed-books">
             <?php
-                if (isset($_GET['booknotfound'])) {
-                    if ($_GET['booknotfound'] == "true") {
+                if (isset($_GET['bookfound'])) {
+                    if ($_GET['bookfound'] == "false") {
                         echo '<p>An error occared while borrowing book</p>';
+                    } else if ($_GET['bookfound'] == "true") {
+                        echo '<p>book added to borrowed books</p>';
                     }
                 }
 
@@ -223,7 +225,7 @@ if (!isset($_SESSION['member_number'])) {
                                     echo '<p>Publication date: ' . $row['publication_date'] . '</p>';
                                     echo '<p>Branch ID: ' . $row['branch_ID'] . '</p>';
                                     echo '<p>Available copies: ' . $row['available_copies'] . '</p>';
-                                    echo '<a class="borrow-button" href="borrowingrequest.php?memberid='. $_SESSION['member_number'] .'&bookid='. $row['book_ID'] .'">Borrow</a>';
+                                    echo '<a class="borrow-button" href="borrowingrequest.php?memberid='. $_SESSION['member_number'] .'&bookid='. $row['book_ID'] .'&branchid='. $row['branch_ID'] .'">Borrow</a>';
                                     echo '</div>';
                                 }
                             } else {
@@ -242,21 +244,47 @@ if (!isset($_SESSION['member_number'])) {
         <div class="right-section">
             <div class="borrowed-books">
                 <h2>Current Borrowed Books</h2>
-                <div class="book-item">
-                    <p class="title">Book Title</p>
-                    <p>Author: Author Name</p>
-                    <p>Due Date: 2023-07-31</p>
-                </div>
-                <div class="book-item">
-                    <p class="title">Book Title</p>
-                    <p>Author: Author Name</p>
-                    <p>Due Date: 2023-08-15</p>
-                </div>
+                <?php
+                    require '../dbh.inc.php';
+                    $id = $_SESSION['member_number'];
+                    $sql = "SELECT * FROM borrowed WHERE id = ? AND book_returned_date > CURDATE()";
+                    $stmt = mysqli_stmt_init($conn);
+                    if (!mysqli_stmt_prepare($stmt, $sql)) {
+                        $errors[] = "Error Reaching Server; Refresh the page!";
+                    } else {
+                        mysqli_stmt_bind_param($stmt, "i", $id);
+                        mysqli_stmt_execute($stmt);
+                        $result = mysqli_stmt_get_result($stmt);
+                        
+                        if (mysqli_num_rows($result) > 0) {
+                            while ($row = mysqli_fetch_assoc($result)) {
+                                $sql_book = "SELECT * FROM book WHERE book_id = ?";
+                                $stmt_book = mysqli_stmt_init($conn); 
+                                if (!mysqli_stmt_prepare($stmt_book, $sql_book)) { 
+                                    $errors[] = "Error Reaching Server; Refresh the page!";
+                                } else {
+                                    mysqli_stmt_bind_param($stmt_book, "i", $row['book_ID']);
+                                    mysqli_stmt_execute($stmt_book);
+                                    $result_book = mysqli_stmt_get_result($stmt_book); 
+                                    echo '<div class="book-item">';
+                                    while ($book_row = mysqli_fetch_assoc($result_book)) { 
+                                        echo '<p class="title">' . $book_row['book_Name'] . '</p>';
+                                        echo '<p>' . $book_row['book_Author'] . '</p>';
+                                        echo '<p>Due Date: ' . $row['book_returned_date'] . '</p>';
+                                    }
+                                    echo '</div>';
+                                }
+                            }
+                        } else {
+                            echo '<p>No Books Borrowed.</p>';
+                        }
+                    }
+                ?>
             </div>
 
             <div class="borrowing-history">
                 <h2>Borrowing History</h2>
-                <a class="history-button" href="borrowinghistory.php">View History</a>
+                <a class="history-button" href="history.php">View History</a>
             </div>
         </div>
     </div>

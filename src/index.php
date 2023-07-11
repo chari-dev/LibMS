@@ -30,8 +30,7 @@ function validateLogin($conn)
         }
 
 
-        //improve on this bcz of sql injection by using "https://youtu.be/LC9GaXkdxF8?list=PL0eyrZgxdwhwBToawjm9faF1ixePexft-&t=4219"
-        if (count($errors) === 0) {
+       if (count($errors) === 0) {
             // Login successful (you can query the database to validate the login credentials)
             $sql = "SELECT id, password FROM member WHERE id = ? OR name = ?";
             $stmt = mysqli_stmt_init($conn);
@@ -47,7 +46,7 @@ function validateLogin($conn)
                     if ($pwdCheck == false) {
                         $errors[] = "Invalid login credentials.";
                         exit();
-                    } elseif ($pwdCheck == true){
+                    } else if ($pwdCheck == true){
                         $_SESSION['member_number'] = $row['id'];
                         $_SESSION['name'] = $row['id'];
                         header('Location: member/dashboard.php');
